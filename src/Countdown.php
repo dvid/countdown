@@ -2,26 +2,22 @@
 
 namespace App;
 
+use DateTime;
+
 class Countdown
 {
-    private $backgroundImage =  __DIR__ . '/../assets/countdown-blank.png';
-
     private $frames;
     private $delays;
     private $loops; 
 
-    private $animatedGif;
-    private $urlDatetime;
+    private $now;
     private $countdownDatetime;     
 
-    public function __construct(string $urlDatetime)
+    public function __construct(DateTime $urlDatetime)
     {
-        $this->urlDatetime = $urlDatetime;
-        $this->countdownDatetime = \DateTime::createFromFormat(
-            'Y-m-d-H-i-s',
-            $this->urlDatetime,
-            new \DateTimeZone('UTC')
-        );
+        $this->now = time();
+        $this->now = new \DateTime(date('r', $this->now));
+        $this->countdownDatetime = $urlDatetime;      
         $this->renderFrames($this->countdownDatetime);
     }
 
@@ -42,11 +38,16 @@ class Countdown
 
     private function renderFrames() :void
     {
-        $now = time();
-        $now = new \DateTime(date('r', $now));
+        $interval = date_diff($this->countdownDatetime, $this->now);
+        $text = $interval->format('%aD');
+        $width = (strlen($text) <= 3) ? 165 : 180;
+        $img = imagecreatetruecolor($width, 50);
+        $bg = imagecolorallocate ($img, 255, 255, 255 );
+        imagefilledrectangle($img,0,0,$width,50,$bg);
+        imagepng($img,"temp.png",9);
         $frames = [];	
         $delays = [];
-        $image = imagecreatefrompng($this->backgroundImage);
+        $image = imagecreatefrompng(__DIR__ ."/../temp.png");
         $delay = 100;
         $font = [
             'size' => 12,
@@ -59,10 +60,10 @@ class Countdown
 
         for($i = 0; $i <= 60; $i++){
 		
-            $interval = date_diff($this->countdownDatetime, $now);
+            $interval = date_diff($this->countdownDatetime, $this->now);
             
-            if($this->countdownDatetime < $now){
-                $image = imagecreatefrompng($this->backgroundImage);
+            if($this->countdownDatetime < $this->now){
+                $image = imagecreatefrompng(__DIR__ ."/../temp.png");
                 ;
                 $text = $interval->format('00:00:00:00');
                 imagettftext ($image , $font['size'] , $font['angle'] , $font['x-offset'] , $font['y-offset'] , $font['color'] , $font['file'], $text );
@@ -74,9 +75,9 @@ class Countdown
                 ob_end_clean();
                 break;
             } else {
-                $image = imagecreatefrompng($this->backgroundImage);
+                $image = imagecreatefrompng(__DIR__ ."/../temp.png");
                 ;
-                $text = $interval->format(' d:%a h:%H m:%I s:%S');
+                $text = $interval->format('  %aD %Hh %Im %Ss');
                 imagettftext ($image , $font['size'] , $font['angle'] , $font['x-offset'] , $font['y-offset'] , $font['color'] , $font['file'], $text );
                 ob_start();
                 imagegif($image);
@@ -86,7 +87,7 @@ class Countdown
                 ob_end_clean();
             }
     
-            $now->modify('+1 second');
+            $this->now->modify('+1 second');
         }
 
         $this->frames = $frames;

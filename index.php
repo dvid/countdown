@@ -5,10 +5,21 @@ use Lib\AnimatedGif;
 
 require 'vendor/autoload.php';
 
-header('Content-type: image/gif');
-header('Content-Disposition: filename="timer.gif"');
-	
-$countdown = new Countdown($_GET['time']);
+//header('Content-type: image/gif');
+//header('Content-Disposition: filename="timer.gif"');
+
+if ($_GET['time']) {
+    $time = \DateTime::createFromFormat(
+        'Y-m-d-H-i-s',
+        $_GET['time'],
+        new \DateTimeZone('UTC')
+    );
+} else {
+    $time = new DateTime(date('r',strtotime("+5 hours")));
+    $time->setTimezone(new \DateTimeZone('UTC'));
+}
+
+$countdown = new Countdown($time);
 
 $gif = new AnimatedGif($countdown->getFrames(), $countdown->getDelays(), $countdown->getLoops());
 $gif->display();
