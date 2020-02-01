@@ -15,7 +15,7 @@ if ($_GET['time']) {
         new \DateTimeZone('UTC')
     );
 } else {
-    $time = new DateTime(date('r',strtotime("+5 hours")));
+    $time = new DateTime(date('r',strtotime("+1 hours")));
     $time->setTimezone(new \DateTimeZone('UTC'));
 }
 
