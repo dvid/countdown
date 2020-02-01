@@ -40,7 +40,7 @@ class Countdown
     {
         $interval = date_diff($this->countdownDatetime, $this->now);
         $text = $interval->format('%aD');
-        $width = (strlen($text) <= 3) ? 165 : 180;
+        $width = $this->getWidth($text);
         $img = imagecreatetruecolor($width, 50);
         $bg = imagecolorallocate ($img, 255, 255, 255 );
         imagefilledrectangle($img,0,0,$width,50,$bg);
@@ -77,7 +77,7 @@ class Countdown
             } else {
                 $image = imagecreatefrompng(__DIR__ ."/../temp.png");
                 ;
-                $text = $interval->format('  %aD %Hh %Im %Ss');
+                $text = $interval->format('   %aD %Hh %Im %Ss');
                 imagettftext ($image , $font['size'] , $font['angle'] , $font['x-offset'] , $font['y-offset'] , $font['color'] , $font['file'], $text );
                 ob_start();
                 imagegif($image);
@@ -93,5 +93,27 @@ class Countdown
         $this->frames = $frames;
         $this->delays = $delays;
         $this->loops = $loops;   
+    }
+
+    private function getWidth($text)
+    {
+        switch (strlen($text)) {
+            case 7:
+            case 6:
+            case 5:
+                $width = 195;
+                break;
+            case 4:
+                $width = 180;
+                break;
+            case 3:
+                $width = 175;
+                break;
+            case 2:
+            default:
+                $width = 165;
+                break;
+        }
+        return $width;
     }
 }
